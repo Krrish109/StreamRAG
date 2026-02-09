@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0f23;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#1a1a3e;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="50%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="stream" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#06b6d4"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="200" rx="16" fill="url(#bg)"/>
+
+  <!-- Graph visualization (left side) -->
+  <g transform="translate(50, 55)" filter="url(#glow)">
+    <!-- Edges -->
+    <line x1="45" y1="25" x2="95" y2="60" stroke="#6366f1" stroke-width="2" opacity="0.6"/>
+    <line x1="45" y1="25" x2="95" y2="0" stroke="#8b5cf6" stroke-width="2" opacity="0.6"/>
+    <line x1="45" y1="65" x2="95" y2="60" stroke="#06b6d4" stroke-width="2" opacity="0.6"/>
+    <line x1="45" y1="65" x2="95" y2="90" stroke="#a78bfa" stroke-width="2" opacity="0.5"/>
+    <line x1="0" y1="45" x2="45" y2="25" stroke="#06b6d4" stroke-width="2" opacity="0.5"/>
+    <line x1="0" y1="45" x2="45" y2="65" stroke="#6366f1" stroke-width="2" opacity="0.5"/>
+
+    <!-- Nodes -->
+    <circle cx="0" cy="45" r="8" fill="#06b6d4"/>
+    <circle cx="45" cy="25" r="8" fill="#8b5cf6"/>
+    <circle cx="45" cy="65" r="8" fill="#6366f1"/>
+    <circle cx="95" cy="0" r="6" fill="#a78bfa"/>
+    <circle cx="95" cy="60" r="8" fill="#8b5cf6"/>
+    <circle cx="95" cy="90" r="6" fill="#06b6d4"/>
+
+    <!-- Animated pulse on center node -->
+    <circle cx="45" cy="25" r="12" fill="none" stroke="#8b5cf6" stroke-width="1" opacity="0.3">
+      <animate attributeName="r" values="10;18;10" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.4;0;0.4" dur="3s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Stream lines (connecting graph to text) -->
+  <g opacity="0.15">
+    <path d="M 170 70 Q 200 80 230 75" stroke="url(#stream)" stroke-width="2" fill="none"/>
+    <path d="M 170 100 Q 200 95 230 100" stroke="url(#stream)" stroke-width="2" fill="none"/>
+    <path d="M 170 130 Q 200 120 230 125" stroke="url(#stream)" stroke-width="2" fill="none"/>
+  </g>
+
+  <!-- Title -->
+  <text x="240" y="105" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="64" font-weight="800" fill="url(#accent)" letter-spacing="-2">
+    Stream<tspan fill="#e2e8f0">RAG</tspan>
+  </text>
+
+  <!-- Subtitle -->
+  <text x="242" y="140" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="18" fill="#94a3b8" letter-spacing="1">
+    Real-time incremental code graph for Claude Code
+  </text>
+
+  <!-- Decorative bottom line -->
+  <rect x="240" y="155" width="120" height="3" rx="1.5" fill="url(#accent)" opacity="0.8"/>
+</svg>

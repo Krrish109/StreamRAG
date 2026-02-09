@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "streamrag",
+  "version": "0.1.0",
+  "description": "StreamRAG: Real-time incremental code graph for Claude Code",
+  "owner": {
+    "name": "Krrish"
+  },
+  "plugins": [
+    {
+      "name": "streamrag",
+      "description": "StreamRAG: Real-time incremental code graph for Claude Code. Computes minimal AST diffs and surgically patches the graph in-place for 26x faster code intelligence.",
+      "version": "0.1.0",
+      "source": ".."
+    }
+  ]
+}

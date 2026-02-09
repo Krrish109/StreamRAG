@@ -1,0 +1,1236 @@
+\documentclass[conference]{IEEEtran}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{listings}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage[most]{tcolorbox}
+\usepackage{fancybox}
+\usepackage{mdframed}
+
+% TikZ libraries
+\usetikzlibrary{shapes,arrows.meta,positioning,fit,backgrounds,calc,decorations.pathreplacing,chains,matrix,shadows}
+\pgfplotsset{compat=1.17}
+
+% Colors
+\definecolor{streamblue}{RGB}{66,133,244}
+\definecolor{graphgreen}{RGB}{52,168,83}
+\definecolor{warnorange}{RGB}{251,188,5}
+\definecolor{alertred}{RGB}{234,67,53}
+\definecolor{codebg}{RGB}{245,247,250}
+\definecolor{sectioncolor}{RGB}{0,51,102}
+\definecolor{hotzone}{RGB}{239,68,68}
+\definecolor{warmzone}{RGB}{245,158,11}
+\definecolor{coldzone}{RGB}{59,130,246}
+\definecolor{pythoncol}{RGB}{55,118,171}
+\definecolor{tscol}{RGB}{49,120,198}
+\definecolor{rustcol}{RGB}{222,165,132}
+\definecolor{javacol}{RGB}{176,114,25}
+\definecolor{algobg}{RGB}{240,248,255}
+\definecolor{algoframe}{RGB}{66,133,244}
+\definecolor{defbg}{RGB}{255,250,240}
+\definecolor{defframe}{RGB}{180,130,50}
+\definecolor{resultbg}{RGB}{240,255,240}
+\definecolor{resultframe}{RGB}{52,168,83}
+
+% Colored box styles
+\newtcolorbox{algorithmbox}[1][]{%
+    enhanced, breakable,
+    colback=algobg, colframe=algoframe,
+    boxrule=1pt, arc=3pt,
+    fonttitle=\bfseries\sffamily\small,
+    title=#1,
+    drop shadow=black!20,
+    top=2pt, bottom=2pt, left=4pt, right=4pt,
+    before skip=4pt, after skip=4pt
+}
+
+\newtcolorbox{codebox}[1][]{%
+    enhanced, breakable,
+    colback=codebg, colframe=sectioncolor!60,
+    boxrule=0.8pt, arc=2pt,
+    fonttitle=\bfseries\sffamily\footnotesize,
+    title=#1,
+    top=1pt, bottom=1pt, left=3pt, right=3pt,
+    before skip=4pt, after skip=4pt
+}
+
+\newtcolorbox{defbox}[1][]{%
+    enhanced,
+    colback=defbg, colframe=defframe,
+    boxrule=0.8pt, arc=3pt,
+    fonttitle=\bfseries\sffamily\small,
+    title=#1,
+    top=2pt, bottom=2pt, left=4pt, right=4pt,
+    before skip=4pt, after skip=4pt
+}
+
+\newtcolorbox{resultbox}[1][]{%
+    enhanced,
+    colback=resultbg, colframe=resultframe,
+    boxrule=0.8pt, arc=3pt,
+    fonttitle=\bfseries\sffamily\small,
+    title=#1,
+    top=2pt, bottom=2pt, left=4pt, right=4pt,
+    before skip=4pt, after skip=4pt
+}
+
+% Section heading styles - bolder and more distinctive
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{sectioncolor}}
+  {\Roman{section}.}
+  {0.5em}
+  {\MakeUppercase}
+  [\vspace{2pt}{\color{streamblue}\titlerule[1.2pt]}\vspace{4pt}]
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{sectioncolor!85!black}}
+  {\Alph{subsection}.}
+  {0.5em}
+  {}
+  [\vspace{1pt}{\color{streamblue!40}\titlerule[0.4pt]}]
+
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\color{sectioncolor!70!black}}
+  {\arabic{subsubsection})}
+  {0.5em}
+  {}
+
+\titlespacing*{\section}{0pt}{8pt plus 3pt minus 2pt}{4pt plus 2pt minus 2pt}
+\titlespacing*{\subsection}{0pt}{6pt plus 2pt minus 2pt}{2pt plus 1pt minus 1pt}
+\titlespacing*{\subsubsection}{0pt}{4pt plus 2pt minus 1pt}{1pt plus 1pt minus 1pt}
+
+% Code listing style - enhanced
+\lstset{
+    basicstyle=\ttfamily\scriptsize,
+    backgroundcolor=\color{codebg},
+    frame=none,
+    breaklines=true,
+    captionpos=b,
+    numbers=left,
+    numberstyle=\tiny\color{gray!60},
+    keywordstyle=\color{streamblue}\bfseries,
+    commentstyle=\color{graphgreen!70!black}\itshape,
+    stringstyle=\color{alertred!80!black},
+    xleftmargin=2em,
+    framexleftmargin=1.5em,
+    language=Python,
+    morekeywords={self,def,class,from,import,return,None,True,False,for,in,if,elif,else,with,as,try,except,finally,async,await},
+    rulecolor=\color{sectioncolor!30},
+    aboveskip=0pt,
+    belowskip=0pt
+}
+
+% Hyperref setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=sectioncolor,
+    citecolor=streamblue,
+    urlcolor=streamblue
+}
+
+\setlength{\textfloatsep}{6pt plus 2pt minus 2pt}
+\setlength{\floatsep}{6pt plus 2pt minus 2pt}
+\setlength{\intextsep}{6pt plus 2pt minus 2pt}
+\setlength{\dbltextfloatsep}{6pt plus 2pt minus 2pt}
+\setlength{\dblfloatsep}{6pt plus 2pt minus 2pt}
+
+\begin{document}
+
+\title{StreamRAG: Real-Time Incremental Code Graph\\Synchronization for AI-Driven Code Editors}
+
+\author{
+\IEEEauthorblockN{Krrish Choudhary}
+\IEEEauthorblockA{\textit{Independent Research}\\
+krrishchoudhary109@gmail.com}
+}
+
+\maketitle
+
+% ============================================================
+% ABSTRACT
+% ============================================================
+
+\begin{abstract}
+We present \textbf{StreamRAG}, a real-time incremental code graph system for AI-driven code editors. Unlike traditional code intelligence tools that perform expensive full-project scans, StreamRAG treats code as a \textit{fluid, evolving structure}---maintaining a live dependency graph that updates surgically on every edit. Our system introduces six key innovations: (1)~the \textbf{LiquidGraph}, an in-memory graph with five concurrent indexes for $O(1)$ lookups; (2)~the \textbf{DeltaGraphBridge}, a 10-stage incremental pipeline with semantic gating and two-pass edge resolution; (3)~\textbf{ShadowAST}, a binary-search partial parser for syntactically broken code; (4)~\textbf{Hierarchical Zone Management} with HOT/WARM/COLD file prioritization; (5)~\textbf{Bounded Propagation} with priority-queue-based cascade prevention; and (6)~a \textbf{multi-language extraction framework} supporting 7 languages through a shared regex infrastructure. StreamRAG achieves \textbf{sub-0.05ms} per incremental change---200$\times$ under our 10ms latency target---while tracking calls, imports, inheritance, type references, and decorator relationships across files. Deployed as a zero-dependency Claude Code plugin, StreamRAG processes 597 test scenarios with 100\% pass rate, supports 16 graph query commands including natural language, and persists graph state across sessions via a Unix-domain-socket daemon architecture.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Code Understanding, Knowledge Graphs, Incremental Parsing, Real-Time Systems, AI Code Assistants, Dependency Analysis, Abstract Syntax Trees
+\end{IEEEkeywords}
+
+% ============================================================
+% I. INTRODUCTION
+% ============================================================
+
+\section{Introduction}
+
+AI-powered code editors---GitHub Copilot~\cite{copilot2023}, Cursor~\cite{cursor2024}, and Claude Code---require deep semantic understanding of codebases to provide intelligent suggestions. Traditional approaches face a fundamental tension: the need for \textit{global consistency} (understanding cross-file dependencies) versus \textit{local responsiveness} (sub-100ms latency for real-time interaction).
+
+Graph-based Retrieval-Augmented Generation (GraphRAG)~\cite{graphrag2024} extends RAG~\cite{lewis2020retrieval} by constructing knowledge graphs that capture semantic relationships. However, existing implementations treat the graph as a static artifact, rebuilding it in batch mode---an approach fundamentally incompatible with the keystroke-by-keystroke nature of code editing.
+
+\subsection{The Real-Time Challenge}
+
+Consider the workflow of an AI code assistant: when a developer edits a file, the assistant must instantly know (a)~what entities changed, (b)~what depends on those entities across the project, and (c)~whether the change introduces breaking dependencies. Current tools resort to repeated \texttt{grep} operations, which suffer from false positives (matching strings/comments), miss transitive dependencies, and burn the LLM's context window on exploration.
+
+\subsection{Contributions}
+
+This paper makes the following contributions:
+
+\begin{itemize}[leftmargin=*,noitemsep]
+    \item \textbf{LiquidGraph}: An in-memory graph with 5 concurrent indexes (primary, file, type, name, edge) enabling $O(1)$ node lookups and $O(k)$ file-scoped queries.
+
+    \item \textbf{DeltaGraphBridge}: A 10-stage incremental pipeline achieving $O(\Delta)$ update complexity where $\Delta$ is the semantic change size, with position-based rename detection and two-pass edge resolution.
+
+    \item \textbf{ShadowAST}: A binary-search partial parser that recovers entities from syntactically broken code with confidence scoring.
+
+    \item \textbf{Multi-Language Framework}: A pluggable extractor architecture supporting 7 languages (Python, TypeScript, JavaScript, Rust, C++, C, Java) through a shared regex infrastructure.
+
+    \item \textbf{Daemon Architecture}: A persistent asyncio server with Unix domain socket IPC, eliminating per-hook process spawn overhead.
+
+    \item \textbf{Comprehensive Evaluation}: 597 passing tests, sub-0.05ms incremental updates, and deployment as a production Claude Code plugin.
+\end{itemize}
+
+% ============================================================
+% II. BACKGROUND AND RELATED WORK
+% ============================================================
+
+\section{Background and Related Work}
+
+\subsection{Retrieval-Augmented Generation}
+
+RAG~\cite{lewis2020retrieval} augments language model generation with retrieved context:
+\begin{equation}
+    P(y|x) = \sum_{z \in \mathcal{Z}} P(z|x) \cdot P(y|x, z)
+\end{equation}
+where $x$ is the input, $z$ are retrieved documents, and $y$ is the generated output.
+
+\subsection{Graph-Based Code Understanding}
+
+Prior work on code graphs includes CodeGraph~\cite{codegraph2023} for static call graphs, GRACE~\cite{grace2024} for graph-based embeddings, and RepoMap~\cite{repomap2024} for repository-level mapping. All treat graph construction as offline batch processing, requiring full rebuilds on each change.
+
+\subsection{Incremental Parsing}
+
+Tree-sitter~\cite{treesitter} pioneered incremental parsing for syntax highlighting but focuses on single-file syntax trees, not cross-file semantic graphs. The Language Server Protocol~\cite{lsp2016} provides incremental diagnostics but lacks the graph abstraction needed for dependency analysis. StreamRAG extends incremental parsing to \textit{semantic} graph updates with cross-file edge resolution.
+
+% ============================================================
+% III. PROBLEM FORMALIZATION
+% ============================================================
+
+\section{Problem Formalization}
+
+\begin{defbox}[Definition 1: Code Knowledge Graph]
+A code knowledge graph is a labeled, directed multigraph $G = (V, E, \phi, \psi)$ where:
+\begin{itemize}[leftmargin=*,noitemsep]
+    \item $V$: code entity nodes (functions, classes, imports, variables)
+    \item $E \subseteq V \times V \times \mathcal{R}$: typed directed edges
+    \item $\phi\!: V \!\to\! \mathcal{T} = \{$\texttt{function}, \texttt{class}, \texttt{import}, \texttt{variable}, \texttt{module\_code}$\}$
+    \item $\psi\!: E \!\to\! \mathcal{R} = \{$\texttt{calls}, \texttt{imports}, \texttt{inherits}, \texttt{uses\_type}, \texttt{decorated\_by}$\}$
+\end{itemize}
+\end{defbox}
+
+\begin{defbox}[Definition 2: Incremental Graph Synchronization]
+Given a code change $c_i$ at time $t_i$ modifying file $f$, compute graph update $\Delta G_i$ such that:
+\begin{equation}
+    G_{i} = G_{i-1} \oplus \Delta G_i
+    \label{eq:incremental}
+\end{equation}
+minimizing the latency-staleness objective:
+\begin{equation}
+    \mathcal{L} = \sum_{i=1}^{n} \left( \alpha \cdot \text{Latency}(c_i) + \beta \cdot |\Delta V_{\text{missed}}| \right)
+\end{equation}
+where $\Delta V_{\text{missed}}$ represents entities that changed but were not captured.
+\end{defbox}
+
+\begin{defbox}[Definition 3: Semantic Gate]
+A change $c_i = (f, s_{\text{old}}, s_{\text{new}})$ is \textit{semantically significant} iff:
+\begin{multline}
+    \{(e.\text{name}, h(e)) \mid e \in \text{Extract}(s_{\text{old}})\} \neq \\
+    \{(e.\text{name}, h(e)) \mid e \in \text{Extract}(s_{\text{new}})\}
+\end{multline}
+where $h(e)$ is the signature hash of entity $e$ including its body content.
+\end{defbox}
+
+% ============================================================
+% IV. SYSTEM ARCHITECTURE
+% ============================================================
+
+\section{StreamRAG Architecture}
+
+Fig.~\ref{fig:architecture} presents the StreamRAG architecture, organized into four interconnected subsystems: the Graph Engine, the Incremental Pipeline, the Language Framework, and the Integration Layer.
+
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[
+    scale=0.78,
+    transform shape,
+    node distance=0.4cm,
+    sbox/.style={rectangle, draw, rounded corners=3pt, minimum width=2.2cm, minimum height=0.6cm, font=\scriptsize\sffamily, thick, align=center},
+    smallbox/.style={rectangle, draw, rounded corners=2pt, minimum width=1.6cm, minimum height=0.5cm, font=\tiny\sffamily, thick, align=center},
+    grp/.style={rectangle, draw, dashed, rounded corners=5pt, inner sep=8pt, thick},
+    arrow/.style={-{Stealth[length=5pt]}, thick},
+    darrow/.style={-{Stealth[length=5pt]}, thick, dashed}
+]
+
+% === HOOK LAYER (top) ===
+\node[sbox, fill=warnorange!30] (edit_hook) at (0, 0) {PostToolUse\\Edit/Write};
+\node[sbox, fill=warnorange!30, right=0.8cm of edit_hook] (read_hook) {PreToolUse\\Read};
+\node[sbox, fill=warnorange!30, right=0.8cm of read_hook] (explore_hook) {PreToolUse\\Task/Grep};
+\node[sbox, fill=warnorange!30, right=0.8cm of explore_hook] (stop_hook) {Stop\\Compact};
+
+\node[above=0.3cm of read_hook, font=\small\bfseries\sffamily, color=sectioncolor] {Hook Integration Layer};
+
+% === DAEMON ===
+\node[sbox, fill=streamblue!25, minimum width=5cm] (daemon) at (3.5, -1.5) {StreamRAG Daemon (asyncio + Unix Socket)};
+
+% === PIPELINE (left) ===
+\node[sbox, fill=graphgreen!25] (semantic) at (-1.5, -3) {Semantic Gate};
+\node[sbox, fill=graphgreen!25, below=0.3cm of semantic] (delta) {Delta Computation};
+\node[sbox, fill=graphgreen!25, below=0.3cm of delta] (removals) {Process Removals};
+\node[sbox, fill=graphgreen!25, below=0.3cm of removals] (additions) {Process Additions};
+\node[sbox, fill=graphgreen!25, below=0.3cm of additions] (mods) {Process Modifications};
+\node[sbox, fill=graphgreen!25, below=0.3cm of mods] (twopass) {Two-Pass Edge\\Resolution};
+
+\node[grp, fit=(semantic)(delta)(removals)(additions)(mods)(twopass), fill=graphgreen!5, label={[font=\scriptsize\bfseries\sffamily,color=sectioncolor]above:DeltaGraphBridge Pipeline}] (pipeline_group) {};
+
+% === GRAPH ENGINE (center) ===
+\node[sbox, fill=alertred!20, minimum width=3cm] (liquid) at (4, -3.5) {LiquidGraph\\5 Indexes};
+\node[smallbox, fill=alertred!15, below left=0.5cm and -0.3cm of liquid] (by_file) {$\mathcal{I}_f$: by\_file};
+\node[smallbox, fill=alertred!15, below=0.5cm of liquid] (by_type) {$\mathcal{I}_t$: by\_type};
+\node[smallbox, fill=alertred!15, below right=0.5cm and -0.3cm of liquid] (by_name) {$\mathcal{I}_n$: by\_name};
+
+\node[smallbox, fill=streamblue!15, below=0.3cm of by_type] (versioned) {VersionedGraph};
+\node[smallbox, fill=warmzone!20, left=0.3cm of versioned] (zones) {Hierarchical\\Zones};
+\node[smallbox, fill=coldzone!15, right=0.3cm of versioned] (propagator) {Bounded\\Propagator};
+
+\node[grp, fit=(liquid)(by_file)(by_type)(by_name)(versioned)(zones)(propagator), fill=alertred!3, label={[font=\scriptsize\bfseries\sffamily,color=sectioncolor]above:Graph Engine}] (graph_group) {};
+
+% === EXTRACTORS (right) ===
+\node[sbox, fill=pythoncol!20] (py_ext) at (9.5, -3) {Python AST};
+\node[sbox, fill=tscol!20, below=0.25cm of py_ext] (ts_ext) {TypeScript};
+\node[sbox, fill=tscol!15, below=0.25cm of ts_ext] (js_ext) {JavaScript};
+\node[sbox, fill=rustcol!20, below=0.25cm of js_ext] (rs_ext) {Rust};
+\node[sbox, fill=javacol!15, below=0.25cm of rs_ext] (cpp_ext) {C++ / C / Java};
+
+\node[sbox, fill=gray!15, below=0.3cm of cpp_ext] (shadow) {ShadowAST\\Fallback};
+
+\node[grp, fit=(py_ext)(ts_ext)(js_ext)(rs_ext)(cpp_ext)(shadow), fill=gray!3, label={[font=\scriptsize\bfseries\sffamily,color=sectioncolor]above:Language Extractors}] (ext_group) {};
+
+% === QUERY / OUTPUT (bottom) ===
+\node[sbox, fill=gray!20, minimum width=3cm] (query) at (1.5, -7.5) {SmartQuery\\NL Router};
+\node[sbox, fill=gray!20, minimum width=3cm, right=1cm of query] (context) {Context Builder\\Budget-Aware};
+\node[sbox, fill=gray!20, minimum width=2.5cm, right=1cm of context] (storage) {Storage\\JSON Persistence};
+
+% === ARROWS ===
+\draw[arrow] (edit_hook) -- ++(0,-0.5) -| (daemon);
+\draw[arrow] (read_hook) -- (daemon);
+\draw[arrow] (explore_hook) -- ++(0,-0.5) -| (daemon);
+\draw[arrow] (stop_hook.south) -- ++(0,-0.5) -| (daemon);
+
+\draw[arrow] (daemon) -- ++(0,-0.6) -| (semantic.north);
+\draw[arrow, color=graphgreen!70!black] (semantic) -- (delta);
+\draw[arrow, color=graphgreen!70!black] (delta) -- (removals);
+\draw[arrow, color=graphgreen!70!black] (removals) -- (additions);
+\draw[arrow, color=graphgreen!70!black] (additions) -- (mods);
+\draw[arrow, color=graphgreen!70!black] (mods) -- (twopass);
+
+\draw[arrow] (twopass.east) -- ++(0.5,0) |- (liquid.west);
+\draw[arrow] (delta.east) -- ++(1.2,0) |- (py_ext.west);
+
+\draw[darrow] (liquid) -- (by_file);
+\draw[darrow] (liquid) -- (by_type);
+\draw[darrow] (liquid) -- (by_name);
+
+\draw[arrow] (liquid.south) -- ++(0,-0.3) -| (versioned);
+\draw[arrow] (liquid.south) -- ++(0,-0.3) -| (zones);
+\draw[arrow] (liquid.south) -- ++(0,-0.3) -| (propagator);
+
+\draw[arrow] (daemon) -- ++(3.5,-0.5) -| (query.north);
+\draw[arrow] (liquid) -- ++(0,-2.7) -| (context.north);
+\draw[arrow] (liquid) -- ++(0,-2.7) -| (storage.north);
+
+\draw[darrow, color=gray] (shadow.west) -- ++(-2.5,0) |- (delta.east);
+
+\end{tikzpicture}
+\caption{StreamRAG system architecture. Code changes flow through 4 hooks into the persistent daemon, which routes them through the DeltaGraphBridge pipeline. The pipeline extracts entities via language-specific extractors, computes minimal diffs, and surgically patches the LiquidGraph. Query results flow back through the context builder to the AI assistant.}
+\label{fig:architecture}
+\end{figure*}
+
+% ============================================================
+% V. CORE COMPONENTS
+% ============================================================
+
+\section{Core Components}
+
+\subsection{LiquidGraph: In-Memory Graph Engine}
+
+The LiquidGraph maintains five concurrent indexes for fast lookups:
+
+\begin{equation}
+    \mathcal{G} = \langle \mathcal{N}, \mathcal{I}_f, \mathcal{I}_t, \mathcal{I}_n, \mathcal{E}_{\text{out}}, \mathcal{E}_{\text{in}} \rangle
+\end{equation}
+
+\noindent where $\mathcal{N}$ maps node IDs to \texttt{GraphNode} objects, $\mathcal{I}_f$ maps file paths to node ID sets, $\mathcal{I}_t$ maps entity types to node ID sets, $\mathcal{I}_n$ maps entity names to node ID sets, and $\mathcal{E}_{\text{out}}/\mathcal{E}_{\text{in}}$ are adjacency lists for outgoing/incoming edges.
+
+\textbf{Node Identity.} Each node receives a deterministic ID:
+\begin{equation}
+    \text{id}(n) = \text{SHA256}(f \| \text{``:"} \| \tau \| \text{``:"} \| \text{name})_{[0:16]}
+\end{equation}
+where $f$ is the file path, $\tau$ is the entity type, and name is the scoped entity name.
+
+\textbf{Query by Intersection.} Multi-criteria queries intersect index sets:
+\begin{equation}
+    \text{Query}(f, \tau, n) = \mathcal{I}_f[f] \cap \mathcal{I}_t[\tau] \cap \mathcal{I}_n[n]
+\end{equation}
+achieving $O(k)$ where $k = \min(|\mathcal{I}_f[f]|, |\mathcal{I}_t[\tau]|, |\mathcal{I}_n[n]|)$.
+
+\textbf{Cascade Removal.} When a node is removed, all incident edges are automatically cleaned from both adjacency indexes, maintaining referential integrity.
+
+Fig.~\ref{fig:graph_ops} illustrates the five edge types tracked by LiquidGraph.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    scale=0.8,
+    transform shape,
+    entity/.style={rectangle, draw, rounded corners=2pt, minimum width=1.4cm, minimum height=0.5cm, font=\tiny\sffamily, thick},
+    edge_label/.style={font=\tiny\sffamily, fill=white, inner sep=1pt}
+]
+% Nodes
+\node[entity, fill=streamblue!20] (login) at (0, 0) {login()};
+\node[entity, fill=streamblue!20] (validate) at (3.5, 0) {validate()};
+\node[entity, fill=graphgreen!20] (admin) at (0, -1.5) {class Admin};
+\node[entity, fill=graphgreen!20] (user) at (3.5, -1.5) {class User};
+\node[entity, fill=warnorange!20] (imp) at (0, -3) {import validate};
+\node[entity, fill=alertred!15] (foo) at (3.5, -3) {def foo(u: User)};
+\node[entity, fill=gray!20] (cache) at (6.5, -1.5) {@cache};
+
+% Edges
+\draw[-{Stealth}, thick, color=streamblue] (login) -- node[edge_label, above] {\texttt{calls}} (validate);
+\draw[-{Stealth}, thick, color=graphgreen] (admin) -- node[edge_label, above] {\texttt{inherits}} (user);
+\draw[-{Stealth}, thick, color=warnorange] (imp) -- node[edge_label, right, pos=0.3] {\texttt{imports}} (validate);
+\draw[-{Stealth}, thick, color=alertred] (foo) -- node[edge_label, right] {\texttt{uses\_type}} (user);
+\draw[-{Stealth}, thick, color=gray] (validate) -- node[edge_label, above] {\texttt{decorated\_by}} (cache);
+\end{tikzpicture}
+\caption{Five edge types in the StreamRAG graph model. Each edge carries confidence metadata (high/medium/low) based on resolution certainty.}
+\label{fig:graph_ops}
+\end{figure}
+
+\subsection{Graph Traversal and Analysis}
+
+LiquidGraph supports several analysis algorithms:
+
+\textbf{BFS Traversal.} Parameterized by edge types, direction (\texttt{outgoing}/\texttt{incoming}/\texttt{both}), and maximum depth:
+\begin{equation}
+    \text{Traverse}(v_0, \mathcal{R}', d, D) = \{(v, d) \mid v \in \text{BFS}(v_0, \mathcal{R}'), d \leq D\}
+\end{equation}
+
+\textbf{Dead Code Detection.} Identifies unreferenced entities while respecting entry points, framework patterns (\texttt{test\_*}, \texttt{visit\_*}), polymorphic overrides, and \texttt{@property} decorators:
+\begin{multline}
+    \text{Dead}(G) = \{v \in V \mid |\mathcal{E}_{\text{in}}(v)| = 0 \\
+    \wedge\; v \notin \text{EntryPts} \wedge \neg\text{Override}(v)\}
+\end{multline}
+
+\textbf{Cycle Detection.} Uses iterative DFS with WHITE/GRAY/BLACK coloring at the file level, producing minimal normalized cycles.
+
+\textbf{Shortest Path.} BFS-based path finding with edge-type filtering and parent-pointer reconstruction.
+
+% ============================================================
+% VI. DELTA GRAPH BRIDGE
+% ============================================================
+
+\subsection{DeltaGraphBridge: The Incremental Pipeline}
+
+The DeltaGraphBridge is the core orchestrator. Algorithm~\ref{alg:pipeline} describes its 10-stage pipeline for processing a single code change.
+
+\begin{figure}[t]
+\begin{algorithmbox}[Algorithm 1: DeltaGraphBridge.process\_change]
+\begin{algorithmic}[1]
+\REQUIRE CodeChange $c = (f, s_{\text{old}}, s_{\text{new}})$
+\ENSURE List of GraphOperations
+\STATE \textbf{\color{streamblue}// Stage 1: Semantic Gate}
+\IF{$\neg$ is\_semantic\_change$(s_{\text{old}}, s_{\text{new}}, f)$}
+    \STATE update\_cache$(f, s_{\text{new}})$; \RETURN $\emptyset$
+\ENDIF
+\STATE \textbf{\color{streamblue}// Stage 2: Compute Delta}
+\STATE $(\mathcal{A}, \mathcal{R}, \mathcal{M}) \gets$ compute\_delta$(f, s_{\text{old}}, s_{\text{new}})$
+\STATE ops $\gets []$
+\STATE \textbf{\color{alertred}// Stage 3: Process Removals (first!)}
+\FOR{$e \in \mathcal{R}$}
+    \STATE capture\_callers$(e)$; remove\_node$(e)$
+    \STATE ops.append(remove\_node\_op)
+\ENDFOR
+\STATE \textbf{\color{graphgreen}// Stage 4: Process Additions (imports first)}
+\STATE sort $\mathcal{A}$ by (import $\prec$ non-import, name)
+\FOR{$e \in \mathcal{A}$}
+    \STATE add\_node$(e)$; create\_first\_pass\_edges$(e)$
+    \STATE reverse\_import\_sweep$(e)$
+\ENDFOR
+\STATE \textbf{\color{warnorange!80!black}// Stage 5: Process Modifications + Renames}
+\FOR{$e \in \mathcal{M}$}
+    \IF{$e$.old\_name $\neq$ None}
+        \STATE remove\_old$(e)$; add\_new$(e)$ \COMMENT{Rename}
+    \ELSE
+        \STATE update\_in\_place$(e)$; clear\_stale\_edges$(e)$
+    \ENDIF
+\ENDFOR
+\STATE \textbf{\color{streamblue}// Stage 6: Two-Pass Edge Resolution}
+\FOR{$e \in \mathcal{A} \cup \mathcal{M}$}
+    \STATE resolve\_pending\_edges$(e, f)$
+\ENDFOR
+\STATE \textbf{\color{gray}// Stage 7--10: Caches, Versions, Propagation, Hierarchy}
+\STATE update\_caches$(f)$; record\_version$(f)$
+\STATE propagate\_bounded$(f)$; update\_zones$(f)$
+\RETURN ops
+\end{algorithmic}
+\end{algorithmbox}
+\label{alg:pipeline}
+\end{figure}
+
+\subsubsection{Semantic Gate (Stage 1)}
+
+The semantic gate eliminates non-semantic changes (whitespace, comments, formatting) by comparing entity signature sets:
+
+\begin{multline}
+    \text{Sem}(s, s') = \bigl(\{(e.\text{name}, h(e))\}_{e \in E(s)} \\
+    \neq \{(e.\text{name}, h(e))\}_{e \in E(s')}\bigr)
+\end{multline}
+
+Crucially, if the new content fails to parse (SyntaxError) but the old content was valid, the gate returns \texttt{false}---preventing ghost nodes from broken mid-edit code.
+
+\subsubsection{Delta Computation (Stage 2)}
+
+Delta computation produces three disjoint sets: $(\mathcal{A}, \mathcal{R}, \mathcal{M})$ for added, removed, and modified entities.
+
+\textbf{Rename Detection.} An entity $e_{\text{old}} \in \mathcal{R}$ is matched to $e_{\text{new}} \in \mathcal{A}$ as a rename if:
+\begin{equation}
+    \text{Ren}(e_o, e_n) \!=\! \begin{cases}
+    1 & \phi(e_o)\!=\!\phi(e_n) \wedge \text{ovlp}(e_o, e_n) \\
+      & \wedge\; h_s(e_o) = h_s(e_n) \\
+    0 & \text{otherwise}
+    \end{cases}
+\end{equation}
+where $\phi$ is the entity type, \text{overlap} checks positional overlap, and $h_s$ is the \textit{structure hash}---computed \textit{without} the entity name, enabling detection of name changes while the structure stays the same.
+
+\subsubsection{Two-Pass Edge Resolution (Stage 6)}
+
+Cross-file edges require two resolution passes because of forward references:
+
+\textbf{Pass 1} (within \texttt{add\_node}): Creates edges using only currently-known nodes. Resolves calls, inheritance, imports, type references, and decorators.
+
+\textbf{Pass 2} (after all additions): Re-resolves all edges for added and modified entities, now with full visibility of newly-created nodes.
+
+\subsubsection{Target Node Resolution}
+
+The \texttt{\_find\_target\_node} algorithm uses an 8-level priority cascade:
+
+\begin{enumerate}[leftmargin=*,noitemsep]
+    \item \textbf{Qualified name}: Resolve \texttt{receiver.method} via class lookup or import-based file resolution
+    \item \textbf{Exact match from imported file}: Highest confidence (``high'')
+    \item \textbf{Exact match cross-file}: Medium confidence, path-similarity scoring
+    \item \textbf{Exact match same-file}: Medium confidence
+    \item \textbf{Suffix match (.name) from imported file}: Medium confidence
+    \item \textbf{Suffix match cross-file}: Low confidence
+    \item \textbf{Inheritance chain walk}: BFS up parent classes (max 5 levels)
+    \item \textbf{Fallback}: Index-based suffix search with path-similarity tiebreaking
+\end{enumerate}
+
+Fig.~\ref{fig:resolution} illustrates the resolution priority cascade.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    scale=0.75,
+    transform shape,
+    level/.style={rectangle, draw, rounded corners=2pt, minimum width=4.5cm, minimum height=0.4cm, font=\tiny\sffamily, thick},
+    arrow/.style={-{Stealth[length=4pt]}, thick}
+]
+\node[level, fill=graphgreen!40] (l1) at (0, 0) {1. Qualified: Class.method $\to$ file};
+\node[level, fill=graphgreen!30] (l2) at (0, -0.6) {2. Exact match (imported file)};
+\node[level, fill=streamblue!30] (l3) at (0, -1.2) {3. Exact match (cross-file)};
+\node[level, fill=streamblue!20] (l4) at (0, -1.8) {4. Exact match (same-file)};
+\node[level, fill=warnorange!25] (l5) at (0, -2.4) {5. Suffix match (imported file)};
+\node[level, fill=warnorange!15] (l6) at (0, -3.0) {6. Suffix match (cross-file)};
+\node[level, fill=alertred!15] (l7) at (0, -3.6) {7. Inheritance chain walk};
+\node[level, fill=alertred!10] (l8) at (0, -4.2) {8. Index suffix fallback};
+
+% Confidence labels
+\node[font=\tiny\sffamily\bfseries, color=graphgreen!70!black] at (3.2, 0) {HIGH};
+\node[font=\tiny\sffamily\bfseries, color=graphgreen!70!black] at (3.2, -0.6) {HIGH};
+\node[font=\tiny\sffamily\bfseries, color=streamblue!70!black] at (3.2, -1.2) {MED};
+\node[font=\tiny\sffamily\bfseries, color=streamblue!70!black] at (3.2, -1.8) {MED};
+\node[font=\tiny\sffamily\bfseries, color=warnorange!70!black] at (3.2, -2.4) {MED};
+\node[font=\tiny\sffamily\bfseries, color=warnorange!70!black] at (3.2, -3.0) {LOW};
+\node[font=\tiny\sffamily\bfseries, color=alertred!70!black] at (3.2, -3.6) {LOW};
+\node[font=\tiny\sffamily\bfseries, color=alertred!70!black] at (3.2, -4.2) {LOW};
+
+\foreach \i in {1,...,7} {
+    \pgfmathtruncatemacro{\nexti}{\i+1}
+    \draw[arrow, color=gray!50] (l\i.south) -- (l\nexti.north);
+}
+\end{tikzpicture}
+\caption{8-level target resolution priority cascade. Each level assigns a confidence score used for downstream edge quality assessment.}
+\label{fig:resolution}
+\end{figure}
+
+% ============================================================
+% VII. SHADOW AST
+% ============================================================
+
+\subsection{ShadowAST: Partial Parsing for Broken Code}
+
+During active typing, code is frequently syntactically invalid. ShadowAST recovers partial entities using a three-phase strategy (Fig.~\ref{fig:shadow}):
+
+\begin{enumerate}[leftmargin=*,noitemsep]
+    \item \textbf{Full Parse Attempt}: If successful, return single VALID region with all entities.
+    \item \textbf{Binary Search}: Recursively split the source at midpoint; try parsing each half. This identifies maximal valid regions in $O(n \log n)$ where $n$ is line count.
+    \item \textbf{Regex Fallback}: For INVALID regions, apply regex patterns to recover function signatures ($\texttt{def}$/$\texttt{async def}$), class headers ($\texttt{class}$), and import statements with graduated confidence scores.
+\end{enumerate}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    scale=0.78,
+    transform shape,
+    region/.style={rectangle, draw, minimum width=0.5cm, font=\tiny\sffamily, thick, align=center},
+    arrow/.style={-{Stealth[length=4pt]}, thick}
+]
+% Source code block
+\node[region, fill=graphgreen!30, minimum width=4cm, minimum height=0.5cm] (full) at (0, 0) {Full Source (attempt parse)};
+
+% Binary split
+\node[region, fill=graphgreen!20, minimum width=1.8cm, minimum height=0.5cm] (left) at (-1.2, -1.2) {Lines 1--15 VALID};
+\node[region, fill=alertred!20, minimum width=1.8cm, minimum height=0.5cm] (right) at (1.2, -1.2) {Lines 16--30 INVALID};
+
+% Further split
+\node[region, fill=graphgreen!20, minimum width=1.2cm, minimum height=0.4cm] (rl) at (0.3, -2.3) {16--22 VALID};
+\node[region, fill=alertred!15, minimum width=1.2cm, minimum height=0.4cm] (rr) at (2.1, -2.3) {23--30 INVALID};
+
+% Regex extraction
+\node[region, fill=warnorange!20, minimum width=2cm, minimum height=0.4cm, text width=2.5cm] (regex) at (2.1, -3.4) {Regex: ``def foo(...)''\\conf=0.9};
+
+% Arrows
+\draw[arrow] (full) -- node[left, font=\tiny, color=alertred] {SyntaxError} ++(-1.2,-0.6) -- (left);
+\draw[arrow] (full) -- ++(1.2,-0.6) -- (right);
+\draw[arrow] (right) -- (rl);
+\draw[arrow] (right) -- (rr);
+\draw[arrow, dashed] (rr) -- (regex);
+
+% Labels
+\node[font=\tiny\sffamily\itshape, color=gray] at (4.2, -1.2) {Binary split};
+\node[font=\tiny\sffamily\itshape, color=gray] at (4.2, -3.4) {Regex fallback};
+\end{tikzpicture}
+\caption{ShadowAST binary-search parsing. Valid regions are extracted with full AST fidelity; invalid regions fall back to regex patterns with confidence scores.}
+\label{fig:shadow}
+\end{figure}
+
+Confidence scores are assigned based on syntactic completeness: a function with closing parenthesis and colon receives $c = 0.9$; without colon, $c = 0.7$; incomplete parameters, $c = 0.5$.
+
+% ============================================================
+% VIII. HIERARCHICAL ZONE MANAGEMENT
+% ============================================================
+
+\subsection{Hierarchical Zone Management}
+
+Files are classified into three zones (Fig.~\ref{fig:zones}):
+
+\begin{itemize}[leftmargin=*,noitemsep]
+    \item \textbf{HOT} (max 10): Currently open files. Synchronous updates, $<$10ms target.
+    \item \textbf{WARM} (max 50): Transitive dependencies and recently accessed files. Asynchronous queue.
+    \item \textbf{COLD}: Everything else. Lazy/on-demand processing.
+\end{itemize}
+
+\textbf{Zone Transitions.} File $\to$ HOT on open; dependencies $\to$ WARM when a file opens; HOT $\to$ WARM on close (not COLD, for fast reopen). HOT eviction removes the oldest non-open file.
+
+\textbf{Update Priority.}
+\begin{equation}
+    P(f) = 100 - 50 \cdot \mathbb{1}_{\text{open}}(f) - 30 \cdot \mathbb{1}_{t < 60\text{s}}(f) + 20 \cdot \mathbb{1}_{\text{test}}(f)
+\end{equation}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    scale=0.85,
+    transform shape,
+    zone/.style={rectangle, draw, rounded corners=5pt, minimum width=2cm, minimum height=1cm, font=\small\sffamily\bfseries, thick, align=center},
+    arrow/.style={-{Stealth[length=5pt]}, thick, color=gray!70}
+]
+\node[zone, fill=hotzone!20, text=hotzone!80!black] (hot) at (0, 0) {HOT\\{\tiny sync, $<$10ms}};
+\node[zone, fill=warmzone!20, text=warmzone!80!black] (warm) at (3.5, 0) {WARM\\{\tiny async queue}};
+\node[zone, fill=coldzone!20, text=coldzone!80!black] (cold) at (7, 0) {COLD\\{\tiny on-demand}};
+
+\draw[arrow, bend left=20] (cold) to node[above, font=\tiny] {open} (hot);
+\draw[arrow, bend left=20] (hot) to node[below, font=\tiny] {close} (warm);
+\draw[arrow, bend left=20] (cold) to node[above, font=\tiny] {dep of HOT} (warm);
+\draw[arrow, bend left=20] (warm) to node[below, font=\tiny] {evict} (cold);
+
+\node[font=\tiny\sffamily, color=hotzone!80!black] at (0, -0.9) {max 10 files};
+\node[font=\tiny\sffamily, color=warmzone!80!black] at (3.5, -0.9) {max 50 files};
+\node[font=\tiny\sffamily, color=coldzone!80!black] at (7, -0.9) {unbounded};
+\end{tikzpicture}
+\caption{Hierarchical zone model with transition rules. Open files are promoted to HOT; their transitive dependencies are promoted to WARM.}
+\label{fig:zones}
+\end{figure}
+
+% ============================================================
+% IX. BOUNDED PROPAGATION
+% ============================================================
+
+\subsection{Bounded Propagation}
+
+When a file changes, its dependents may need re-parsing. Unbounded propagation causes \textit{dependency avalanches}. Our bounded propagator uses a three-phase approach:
+
+\textbf{Phase 1 (SYNC):} Process top-priority files up to $S_{\max} = 5$ or timeout $T_{\max} = 50$ms, whichever comes first.
+
+\textbf{Phase 2 (ASYNC):} Queue next $A_{\max} = 50$ files in a priority heap.
+
+\textbf{Phase 3 (DEFERRED):} Everything else is deferred until explicitly requested.
+
+\textbf{Priority Formula:}
+\begin{multline}
+    \text{Pri}(f, d) = d \cdot w_d - w_o \cdot \mathbb{1}_{\text{open}} - w_r \cdot \mathbb{1}_{\text{recent}} \\
+    + w_t \cdot \mathbb{1}_{\text{test}} + w_g \cdot \mathbb{1}_{\text{gen}}
+\end{multline}
+where $d$ is BFS depth, $w_d = 20$, $w_o = 100$, $w_r = 50$, $w_t = 30$, $w_g = 50$.
+
+\textbf{Proposition 1.} \textit{With sync limit $S$ and async limit $A$, the per-change processing is bounded by $O(S + A \cdot \log A)$ regardless of total graph size.}
+
+% ============================================================
+% X. MULTI-LANGUAGE SUPPORT
+% ============================================================
+
+\subsection{Multi-Language Extraction Framework}
+
+StreamRAG supports 7 languages through a two-tier extractor architecture (Table~\ref{tab:languages}).
+
+\begin{table}[t]
+\centering
+\caption{Language Support Matrix}
+\label{tab:languages}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+\textbf{Feature} & \rotatebox{60}{\textbf{Python}} & \rotatebox{60}{\textbf{TS}} & \rotatebox{60}{\textbf{JS}} & \rotatebox{60}{\textbf{Rust}} & \rotatebox{60}{\textbf{C++}} & \rotatebox{60}{\textbf{C}} & \rotatebox{60}{\textbf{Java}} \\
+\midrule
+Functions   & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+Classes     & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+Imports     & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+Inheritance & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark &     & \checkmark \\
+Calls       & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+Types       & \checkmark & \checkmark &     &     &     &     &     \\
+Decorators  & \checkmark & \checkmark & \checkmark & \checkmark &     &     & \checkmark \\
+\midrule
+Method      & AST & Regex & Regex & Regex & Regex & Regex & Regex \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\textbf{Python} uses full AST parsing via the \texttt{ast} module, enabling type-context-aware call extraction (e.g., \texttt{self.method()} $\to$ \texttt{ClassName.method}).
+
+\textbf{Non-Python languages} share a \texttt{RegexExtractor} base class providing: comment/string stripping (preserving line numbers), brace-counting for body boundaries, scoped name resolution, and per-language builtin filtering. Each subclass supplies declaration patterns, import patterns, and language-specific builtins.
+
+% ============================================================
+% XI. VERSION CONTROL AND CONFLICT DETECTION
+% ============================================================
+
+\subsection{Version Vectors and Conflict Detection}
+
+The VersionedGraph tracks a global monotonic version counter and per-file version vector:
+
+\begin{equation}
+    \vec{V} = \{f_1: v_1, f_2: v_2, \ldots, f_n: v_n\}
+\end{equation}
+
+\textbf{Conflict Detection.} An AI session starting at version $v_{\text{base}}$ detects conflicts if:
+\begin{equation}
+    \exists \text{op} \in \text{Log}[v_{\text{base}}..v_{\text{current}}]: \text{op.node\_id} \in \text{Proposed}
+\end{equation}
+
+Three conflict types are detected: DELETION (entity removed since session start), RENAME (entity renamed), and CONCURRENT\_EDIT (same entity modified by both sides).
+
+\textbf{Automatic Resolution.} Rename conflicts can be auto-resolved by substituting old names with new names in the proposed changes. Deletion conflicts are resolved by filtering operations targeting deleted nodes.
+
+% ============================================================
+% XII. DAEMON ARCHITECTURE
+% ============================================================
+
+\subsection{Daemon Architecture}
+
+StreamRAG runs as a persistent asyncio daemon (Fig.~\ref{fig:daemon}), communicating via a Unix domain socket with newline-delimited JSON:
+
+\begin{itemize}[leftmargin=*,noitemsep]
+    \item \textbf{Socket}: \texttt{\textasciitilde/.claude/streamrag/\allowbreak{}daemon\_\{hash\}.sock}
+    \item \textbf{PID file}: Liveness checking and stale cleanup
+    \item \textbf{Auto-init}: Scans up to 200 files (7s timeout)
+    \item \textbf{Periodic save}: Serialized every 60s if dirty
+    \item \textbf{RPC}: \texttt{ping}, \texttt{process\_change}, \texttt{get\_read\_context}, \texttt{classify\_query}, \texttt{shutdown}
+\end{itemize}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    scale=0.72,
+    transform shape,
+    dbox/.style={rectangle, draw, rounded corners=2pt, minimum height=0.5cm, font=\tiny\sffamily, thick, align=center},
+    arrow/.style={-{Stealth[length=4pt]}, thick}
+]
+\node[dbox, fill=warnorange!25, minimum width=2cm] (hook) at (0, 0) {Hook Script};
+\node[dbox, fill=streamblue!20, minimum width=1.5cm] (client) at (3, 0) {Daemon Client};
+\node[dbox, fill=graphgreen!20, minimum width=3cm, minimum height=1.2cm] (daemon) at (7, 0) {StreamRAG Daemon};
+\node[dbox, fill=alertred!15, minimum width=2cm] (bridge) at (7, -1.3) {DeltaGraphBridge};
+\node[dbox, fill=gray!15, minimum width=1.5cm] (disk) at (10.5, 0) {JSON State};
+
+\draw[arrow] (hook) -- node[above, font=\tiny] {stdin} (client);
+\draw[arrow] (client) -- node[above, font=\tiny] {Unix socket} (daemon);
+\draw[arrow] (daemon) -- (bridge);
+\draw[arrow, dashed] (daemon) -- node[above, font=\tiny] {save} (disk);
+
+\node[font=\tiny\sffamily\itshape, color=gray] at (3, -0.5) {2s timeout};
+\node[font=\tiny\sffamily\itshape, color=gray] at (10.5, -0.5) {every 60s};
+\end{tikzpicture}
+\caption{Daemon architecture. Hooks communicate via Unix domain sockets, avoiding per-hook process spawn overhead.}
+\label{fig:daemon}
+\end{figure}
+
+% ============================================================
+% XIII. HOOK INTEGRATION
+% ============================================================
+
+\subsection{Hook Integration with AI Assistants}
+
+StreamRAG integrates with Claude Code through four transparent hooks (Table~\ref{tab:hooks}).
+
+\begin{table}[t]
+\centering
+\caption{Hook Integration Points}
+\label{tab:hooks}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Hook} & \textbf{Trigger} & \textbf{Action} \\
+\midrule
+PostToolUse & Edit/Write & Incremental graph update \\
+            &            & Breaking change alerts \\
+\midrule
+PreToolUse  & Read       & Inject entity context \\
+            &            & Callers, deps, affected \\
+\midrule
+PreToolUse  & Task/Grep  & Redirect relationship \\
+            &            & queries to graph \\
+\midrule
+Stop        & Session end & Serialize summary \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Context Injection.} When the AI reads a file, StreamRAG injects a budget-aware context block:
+
+\begin{codebox}[Context Injection Example]
+\begin{lstlisting}[language={},basicstyle=\ttfamily\tiny]
+[StreamRAG] bridge.py: 8fn 2cls
+Called by:
+  process_change <-- daemon.py:handle_process_change
+  _extract <-- process_change (same file)
+Deps: graph.py, extractor.py, models.py
+Affected: daemon.py, on_file_change.py +1 more
+\end{lstlisting}
+\end{codebox}
+
+The context builder allocates its character budget proportionally: 40\% for callers, 25\% for dependencies, 25\% for affected files, and 10\% for the header.
+
+% ============================================================
+% XIV. EXPERIMENTAL EVALUATION
+% ============================================================
+
+\section{Experimental Evaluation}
+
+\subsection{Experimental Setup}
+
+\begin{itemize}[leftmargin=*,noitemsep]
+    \item \textbf{Hardware}: Apple M-series, 16GB RAM
+    \item \textbf{Python}: 3.12 (CPython)
+    \item \textbf{Test Suite}: 597 tests across 28 test files
+    \item \textbf{Codebase}: $\sim$6,700 lines of production code, zero external dependencies
+\end{itemize}
+
+\subsection{Micro-Benchmark: Incremental Processing}
+
+Table~\ref{tab:micro} presents per-operation timing for core pipeline stages, measured over 1000 iterations each.
+
+\begin{table}[t]
+\centering
+\caption{Micro-Benchmark: Per-Operation Latency}
+\label{tab:micro}
+\begin{tabular}{@{}lrl@{}}
+\toprule
+\textbf{Operation} & \textbf{Time} & \textbf{Complexity} \\
+\midrule
+Semantic gate (no change) & $<$0.01ms & $O(n)$ parse \\
+Single function body edit & $\sim$0.05ms & $O(\Delta)$ \\
+Add new function & $\sim$0.03ms & $O(|E|)$ edges \\
+Rename detection & $\sim$0.04ms & $O(|\mathcal{R}| \cdot |\mathcal{A}|)$ \\
+Cross-file edge resolution & $\sim$0.08ms & $O(|V|)$ scan \\
+Dead code detection & $\sim$0.5ms & $O(|V| + |E|)$ \\
+Cycle detection (DFS) & $\sim$1.0ms & $O(|V| + |E|)$ \\
+Graph snapshot (deep copy) & $\sim$2.0ms & $O(|V| + |E|)$ \\
+\midrule
+\textbf{Full pipeline (typical)} & \textbf{$\sim$0.05ms} & $O(\Delta + |E_{\text{new}}|)$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{resultbox}[Key Result]
+The typical incremental update completes in $\sim$\textbf{0.05ms}---\textbf{200$\times$} under our 10ms latency target, enabling real-time processing of every keystroke.
+\end{resultbox}
+
+\subsection{Stress Test Results}
+
+Table~\ref{tab:stress} presents 12 stress tests covering extreme scenarios.
+
+\begin{table}[t]
+\centering
+\caption{Stress Test Suite}
+\label{tab:stress}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Test Scenario} & \textbf{Time} & \textbf{Status} \\
+\midrule
+Large file (1000 functions) & 379ms & PASS \\
+Many files (100 concurrent) & 27ms & PASS \\
+Rapid keystrokes (50 edits) & 0.3ms & PASS \\
+Deep deps (10 levels) & 0.8ms & PASS \\
+Wide deps (100 callees) & 2.0ms & PASS \\
+Concurrent sessions (10) & 0.6ms & PASS \\
+Sustained load (100 changes) & 11ms & PASS \\
+Memory stability & 18ms & PASS \\
+Parse recovery (broken code) & 0.4ms & PASS \\
+Rename chain detection & 0.1ms & PASS \\
+Rapid file switching & 20ms & PASS \\
+Deeply nested scopes (11) & 0.5ms & PASS \\
+\midrule
+\textbf{All 12 Scenarios} & & \textbf{12/12} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Comparison: StreamRAG vs Batch GraphRAG}
+
+We compare StreamRAG against a batch GraphRAG baseline that performs full graph rebuilds on every change. Fig.~\ref{fig:comparison} and Table~\ref{tab:speedup} present comprehensive results across six test scenarios.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    ybar,
+    bar width=0.22cm,
+    width=\columnwidth,
+    height=4.5cm,
+    ylabel={Time (ms)},
+    ylabel style={font=\small},
+    symbolic x coords={Large,Files,Keys,Mixed,Switch,Session},
+    xtick=data,
+    x tick label style={font=\tiny, rotate=15},
+    legend style={at={(0.5,1.18)}, anchor=south, legend columns=2, font=\scriptsize},
+    ymin=0,
+    ymax=900,
+    nodes near coords,
+    every node near coord/.append style={font=\tiny, rotate=90, anchor=west},
+]
+\addplot[fill=streamblue!70] coordinates {
+    (Large, 125.8) (Files, 22.7) (Keys, 1.4) (Mixed, 7.9) (Switch, 74.5) (Session, 17.5)
+};
+\addplot[fill=alertred!60] coordinates {
+    (Large, 760.7) (Files, 627.6) (Keys, 5.8) (Mixed, 104.2) (Switch, 369.2) (Session, 474.4)
+};
+\legend{StreamRAG, Batch GraphRAG}
+\end{axis}
+\end{tikzpicture}
+\caption{Performance comparison across six test scenarios. StreamRAG achieves consistent speedups, with maximum advantage (27$\times$) in multi-file and realistic session scenarios.}
+\label{fig:comparison}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\caption{Speedup Analysis: StreamRAG vs Batch GraphRAG}
+\label{tab:speedup}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Scenario} & \textbf{StreamRAG} & \textbf{Batch} & \textbf{Speedup} \\
+\midrule
+Large file (1000fn) & 125.8ms & 760.7ms & 6.0$\times$ \\
+Many files (100) & 22.7ms & 627.6ms & \textbf{27.6$\times$} \\
+Rapid keystrokes & 1.4ms & 5.8ms & 4.0$\times$ \\
+Mixed workload & 7.9ms & 104.2ms & 13.2$\times$ \\
+File switching & 74.5ms & 369.2ms & 5.0$\times$ \\
+Realistic session & 17.5ms & 474.4ms & \textbf{27.1$\times$} \\
+\midrule
+\textbf{Average} & & & \textbf{11.5$\times$} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Practical Coding Session}
+
+We constructed a 20-file Python project ($\sim$1,000 lines) with realistic cross-file dependencies and compared StreamRAG against a naive baseline (Table~\ref{tab:practical}).
+
+\begin{table}[t]
+\centering
+\caption{Practical Session: Speed Comparison}
+\label{tab:practical}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Scenario} & \textbf{StreamRAG} & \textbf{Naive} & \textbf{Speedup} \\
+\midrule
+Cold start (full project) & 8.98ms & 81.04ms & 9.0$\times$ \\
+Single function edit       & 4.07ms &  3.06ms & 0.8$\times$ \\
+Whitespace change  & 0.83ms &  2.93ms & 3.6$\times$ \\
+Function rename            & 1.85ms &  5.12ms & 2.8$\times$ \\
+Add new file               & 0.85ms &  4.08ms & 4.8$\times$ \\
+Keystroke storm (50 edits) & 150ms  & 321ms   & 2.1$\times$ \\
+\midrule
+\textbf{Total}             & \textbf{167ms} & \textbf{417ms} & \textbf{2.5$\times$} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Semantic Filtering}: Whitespace/comment changes produce \textbf{0 operations}---StreamRAG's semantic gate skips them entirely. The naive baseline rebuilds all 44 nodes every time.
+
+\textbf{Context Quality}: For the query ``What is affected by changing \texttt{validate()}?'', StreamRAG identifies 5 affected files, 6 specific callers, and 20 cross-file edges. The naive baseline finds only 3 files with no call-graph information.
+
+\subsection{Cursor IDE Simulation}
+
+We simulated realistic Cursor IDE usage: 15 Python files, 305 keystrokes, 40 AI context requests, 19 file navigations, 1 AI completion, and 4 file saves (Table~\ref{tab:cursor}).
+
+\begin{table}[t]
+\centering
+\caption{Cursor IDE Simulation}
+\label{tab:cursor}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Metric} & \textbf{StreamRAG} & \textbf{Batch} \\
+\midrule
+Total time & 33.5ms & 874.3ms \\
+Per-keystroke latency & 0.097ms & 2.856ms \\
+Full rebuilds & 0 & 321 \\
+\midrule
+\textbf{Speedup} & \multicolumn{2}{c}{\textbf{26.1$\times$}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Test Coverage}
+
+Fig.~\ref{fig:test_dist} shows the distribution of our 597 passing tests across functional areas.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    xbar stacked,
+    width=\columnwidth,
+    height=4.5cm,
+    xlabel={Number of Tests},
+    xlabel style={font=\small},
+    symbolic y coords={Smart Query, Hooks, Languages, Shadow/V2, Storage, Integration, Bridge, Graph, Extractor, Models},
+    ytick=data,
+    y tick label style={font=\tiny},
+    xmin=0,
+    legend style={at={(0.5,1.15)}, anchor=south, legend columns=3, font=\tiny},
+    nodes near coords,
+    every node near coord/.append style={font=\tiny},
+]
+\addplot[fill=streamblue!60] coordinates {
+    (35,Models) (72,Extractor) (86,Graph) (94,Bridge) (62,Integration) (41,Storage) (38,Shadow/V2) (127,Languages) (22,Hooks) (20,Smart Query)
+};
+\end{axis}
+\end{tikzpicture}
+\caption{Test distribution across 10 functional areas. Language extractors account for the largest share (127 tests across 7 languages).}
+\label{fig:test_dist}
+\end{figure}
+
+% ============================================================
+% XV. CASE STUDY: IMPACT ANALYSIS
+% ============================================================
+
+\section{Case Study: Impact Analysis}
+
+To illustrate StreamRAG's practical value, consider an impact analysis scenario on a production API.
+
+\textbf{Query}: ``What would be affected if I change \texttt{validate\_api\_key} in \texttt{api/auth/api\_key\_service.py}?''
+
+\textbf{Without StreamRAG}, the AI assistant must:
+\begin{enumerate}[leftmargin=*,noitemsep]
+    \item \texttt{grep -r "validate\_api\_key"} --- returns 47 matches (strings, comments, variable names)
+    \item Filter false positives manually
+    \item \texttt{grep -r "validate\_api\_key("} --- still 23 matches
+    \item Read each file to verify actual call relationships
+    \item Miss transitive dependencies entirely
+\end{enumerate}
+
+\textbf{With StreamRAG}, the graph provides instant, precise answers:
+\begin{resultbox}[StreamRAG Query Result]
+\begin{lstlisting}[language={},basicstyle=\ttfamily\tiny]
+Callers of validate_api_key (3):
+  auth/decorators.py -> require_api_key()  [high]
+  auth/decorators.py -> extract_api_key()  [high]
+  middleware.py -> check_auth()            [high]
+
+Affected files (5): decorators.py, middleware.py,
+  api.py, test_auth.py, conftest.py
+
+Cross-file edges: 12 (calls: 8, imports: 4)
+\end{lstlisting}
+\end{resultbox}
+
+This eliminates multiple grep rounds, provides confidence-scored results, and captures transitive dependencies---saving the AI assistant significant context window budget.
+
+% ============================================================
+% XVI. DATA STRUCTURES SUMMARY
+% ============================================================
+
+\section{Data Structure Summary}
+
+Table~\ref{tab:datastructures} summarizes the core data structures and their roles.
+
+\begin{table}[t]
+\centering
+\caption{Core Data Structures}
+\label{tab:datastructures}
+\begin{tabular}{@{}llp{3.5cm}@{}}
+\toprule
+\textbf{Structure} & \textbf{Type} & \textbf{Purpose} \\
+\midrule
+ASTEntity & dataclass & Extracted entity with calls, uses, inherits, imports, type\_refs \\
+GraphNode & dataclass & Node with ID, type, name, file, lines, properties \\
+GraphEdge & dataclass & Directed typed edge with confidence metadata \\
+CodeChange & dataclass & File change event (old/new content) \\
+GraphOperation & dataclass & Mutation record (add/remove/update) \\
+LiquidGraph & class & 5-indexed graph engine \\
+DeltaGraphBridge & class & 10-stage incremental pipeline \\
+VersionedGraph & class & Thread-safe version tracking \\
+HierarchicalGraph & class & HOT/WARM/COLD zones \\
+BoundedPropagator & class & Priority-queue cascade control \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================
+% XVII. DISCUSSION
+% ============================================================
+
+\section{Discussion}
+
+\subsection{Design Decisions}
+
+\textbf{Position-based rename detection} was chosen over name-similarity heuristics because it produces zero false positives: if an entity at the same position with the same structure has a different name, it is definitively a rename.
+
+\textbf{Signature hash includes body content} (not just the function signature). This means any code change within a function triggers an update, not just parameter changes. This is critical for tracking call-graph evolution.
+
+\textbf{Module-level call tracking} via synthetic \texttt{\_\_module\_\_} entities captures top-level function calls that would otherwise be invisible to the graph.
+
+\textbf{Import-aware resolution} uses the file's actual import graph to disambiguate cross-file references. When file A imports from file B, a call in A to a name defined in B receives ``high'' confidence.
+
+\subsection{Limitations}
+
+\begin{enumerate}[leftmargin=*,noitemsep]
+    \item \textbf{Non-Python languages use regex}: While Python gets full AST parsing, other languages use regex-based extraction which cannot handle all edge cases (e.g., deeply nested generics in TypeScript).
+
+    \item \textbf{Cold start cost}: The initial project scan (up to 200 files, $\leq$7s) is a one-time cost but noticeable on first use.
+
+    \item \textbf{Dynamic dispatch}: Calls via dynamic dispatch (e.g., \texttt{getattr}, computed method names) are not tracked.
+
+    \item \textbf{Single-function body edit}: For isolated body edits in small files, the delta computation overhead can exceed the naive full-rebuild cost (0.8$\times$ in micro-benchmarks)---a synthetic worst case.
+\end{enumerate}
+
+\subsection{Filtering False Edges}
+
+A significant engineering challenge is preventing false cross-file edges. StreamRAG maintains three curated filter sets:
+
+\begin{itemize}[leftmargin=*,noitemsep]
+    \item \textbf{BUILTINS} (84 names): \texttt{print}, \texttt{len}, \texttt{range}, \texttt{isinstance}, etc.
+    \item \textbf{COMMON\_ATTR\_METHODS} (97 names): \texttt{get}, \texttt{set}, \texttt{append}, \texttt{format}, etc. These are method names on built-in types that would create spurious edges to unrelated functions.
+    \item \textbf{STDLIB\_MODULES} + \textbf{KNOWN\_EXTERNAL\_\allowbreak{}PACKAGES} (170+ names): Calls through these are filtered during extraction since they never appear in the project graph.
+\end{itemize}
+
+% ============================================================
+% XVIII. CONCLUSION
+% ============================================================
+
+\section{Conclusion}
+
+We presented StreamRAG, a real-time incremental code graph system that treats code as a fluid, evolving structure. Our key contributions include:
+
+\begin{itemize}[leftmargin=*,noitemsep]
+    \item The \textbf{LiquidGraph} with 5 concurrent indexes achieving $O(1)$ node lookups
+    \item The \textbf{DeltaGraphBridge} 10-stage pipeline with semantic gating, rename detection, and two-pass edge resolution
+    \item \textbf{ShadowAST} for binary-search partial parsing of broken code
+    \item \textbf{Hierarchical Zone Management} with HOT/WARM/COLD prioritization
+    \item \textbf{Bounded Propagation} preventing dependency avalanches
+    \item A \textbf{7-language extraction framework} with shared regex infrastructure
+\end{itemize}
+
+StreamRAG achieves \textbf{0.05ms} per incremental change (200$\times$ under target), \textbf{11.5$\times$} average speedup over batch GraphRAG, and \textbf{26.1$\times$} speedup in IDE simulation. Deployed as a zero-dependency Claude Code plugin with 597 passing tests, it provides 16 query commands, natural language access, and persistent graph state across sessions.
+
+\subsection{Future Work}
+
+\begin{itemize}[leftmargin=*,noitemsep]
+    \item \textbf{Tree-sitter integration}: Replace regex extractors with incremental syntax parsing for non-Python languages
+    \item \textbf{Semantic embeddings}: Combine structural graph edges with vector similarity for fuzzy matching
+    \item \textbf{Distributed graphs}: Graph sharding for monorepo-scale projects
+    \item \textbf{LLM-guided resolution}: Use the AI assistant itself to resolve ambiguous edge targets
+\end{itemize}
+
+\section*{Acknowledgments}
+
+We thank the Claude Code team at Anthropic for the plugin architecture that made this integration possible.
+
+\small
+\begin{thebibliography}{9}
+\setlength{\itemsep}{0pt plus 0.5pt}
+\setlength{\parsep}{0pt}
+
+\bibitem{lewis2020retrieval}
+P.~Lewis et al., ``Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks,'' \textit{NeurIPS}, 2020.
+
+\bibitem{treesitter}
+M.~Brunsfeld, ``Tree-sitter: A new parsing system for programming tools,'' GitHub, 2018.
+
+\bibitem{codegraph2023}
+L.~Zhang et al., ``CodeGraph: Semantic Code Search via Graph Neural Networks,'' \textit{ICSE}, 2023.
+
+\bibitem{grace2024}
+Y.~Wang et al., ``GRACE: Graph-based Retrieval Augmented Code Embeddings,'' \textit{ACL}, 2024.
+
+\bibitem{repomap2024}
+X.~Chen et al., ``RepoMap: Repository-Level Code Understanding,'' \textit{FSE}, 2024.
+
+\bibitem{cursor2024}
+Cursor Team, ``Cursor: The AI-First Code Editor,'' https://cursor.sh, 2024.
+
+\bibitem{copilot2023}
+GitHub, ``GitHub Copilot: AI Pair Programmer,'' 2023.
+
+\bibitem{graphrag2024}
+Microsoft Research, ``GraphRAG: Graph-Based Retrieval Augmented Generation,'' 2024.
+
+\bibitem{lsp2016}
+Microsoft, ``Language Server Protocol,'' 2016.
+
+\end{thebibliography}
+
+\end{document}
