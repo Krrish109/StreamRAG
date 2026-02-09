@@ -1,0 +1,100 @@
+\relax 
+\providecommand\zref@newlabel[2]{}
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{copilot2023}
+\citation{cursor2024}
+\citation{graphrag2024}
+\citation{lewis2020retrieval}
+\citation{lewis2020retrieval}
+\citation{codegraph2023}
+\citation{grace2024}
+\citation{repomap2024}
+\citation{treesitter}
+\citation{lsp2016}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {I-A}}The Real-Time Challenge}{1}{subsection.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {I-B}}Contributions}{1}{subsection.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {II}Background and Related Work}{1}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}Retrieval-Augmented Generation}{1}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}Graph-Based Code Understanding}{1}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-C}}Incremental Parsing}{2}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {III}Problem Formalization}{2}{section.3}\protected@file@percent }
+\newlabel{eq:incremental}{{2}{2}{Problem Formalization}{equation.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {IV}StreamRAG Architecture}{2}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {V}Core Components}{2}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-A}}LiquidGraph: In-Memory Graph Engine}{2}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-B}}Graph Traversal and Analysis}{2}{subsection.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-C}}DeltaGraphBridge: The Incremental Pipeline}{2}{subsection.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-C}1}Semantic Gate (Stage 1)}{2}{subsubsection.5.3.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces StreamRAG system architecture. Code changes flow through 4 hooks into the persistent daemon, which routes them through the DeltaGraphBridge pipeline. The pipeline extracts entities via language-specific extractors, computes minimal diffs, and surgically patches the LiquidGraph. Query results flow back through the context builder to the AI assistant.}}{3}{figure.1}\protected@file@percent }
+\newlabel{fig:architecture}{{1}{3}{StreamRAG system architecture. Code changes flow through 4 hooks into the persistent daemon, which routes them through the DeltaGraphBridge pipeline. The pipeline extracts entities via language-specific extractors, computes minimal diffs, and surgically patches the LiquidGraph. Query results flow back through the context builder to the AI assistant}{figure.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Five edge types in the StreamRAG graph model. Each edge carries confidence metadata (high/medium/low) based on resolution certainty.}}{3}{figure.2}\protected@file@percent }
+\newlabel{fig:graph_ops}{{2}{3}{Five edge types in the StreamRAG graph model. Each edge carries confidence metadata (high/medium/low) based on resolution certainty}{figure.2}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-C}2}Delta Computation (Stage 2)}{3}{subsubsection.5.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-C}3}Two-Pass Edge Resolution (Stage 6)}{3}{subsubsection.5.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {V-C}4}Target Node Resolution}{3}{subsubsection.5.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-D}}ShadowAST: Partial Parsing for Broken Code}{3}{subsection.5.4}\protected@file@percent }
+\newlabel{alg:pipeline}{{\mbox  {V-C}}{4}{DeltaGraphBridge: The Incremental Pipeline}{ALC@unique.35}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-E}}Hierarchical Zone Management}{4}{subsection.5.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces 8-level target resolution priority cascade. Each level assigns a confidence score used for downstream edge quality assessment.}}{4}{figure.3}\protected@file@percent }
+\newlabel{fig:resolution}{{3}{4}{8-level target resolution priority cascade. Each level assigns a confidence score used for downstream edge quality assessment}{figure.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces ShadowAST binary-search parsing. Valid regions are extracted with full AST fidelity; invalid regions fall back to regex patterns with confidence scores.}}{4}{figure.4}\protected@file@percent }
+\newlabel{fig:shadow}{{4}{4}{ShadowAST binary-search parsing. Valid regions are extracted with full AST fidelity; invalid regions fall back to regex patterns with confidence scores}{figure.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-F}}Bounded Propagation}{4}{subsection.5.6}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Hierarchical zone model with transition rules. Open files are promoted to HOT; their transitive dependencies are promoted to WARM.}}{5}{figure.5}\protected@file@percent }
+\newlabel{fig:zones}{{5}{5}{Hierarchical zone model with transition rules. Open files are promoted to HOT; their transitive dependencies are promoted to WARM}{figure.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Language Support Matrix}}{5}{table.1}\protected@file@percent }
+\newlabel{tab:languages}{{I}{5}{Language Support Matrix}{table.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-G}}Multi-Language Extraction Framework}{5}{subsection.5.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-H}}Version Vectors and Conflict Detection}{5}{subsection.5.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-I}}Daemon Architecture}{5}{subsection.5.9}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Daemon architecture. Hooks communicate via Unix domain sockets, avoiding per-hook process spawn overhead.}}{5}{figure.6}\protected@file@percent }
+\newlabel{fig:daemon}{{6}{5}{Daemon architecture. Hooks communicate via Unix domain sockets, avoiding per-hook process spawn overhead}{figure.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Hook Integration Points}}{5}{table.2}\protected@file@percent }
+\newlabel{tab:hooks}{{II}{5}{Hook Integration Points}{table.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {V-J}}Hook Integration with AI Assistants}{5}{subsection.5.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Experimental Evaluation}{5}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-A}}Experimental Setup}{5}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-B}}Micro-Benchmark: Incremental Processing}{5}{subsection.6.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Micro-Benchmark: Per-Operation Latency}}{6}{table.3}\protected@file@percent }
+\newlabel{tab:micro}{{III}{6}{Micro-Benchmark: Per-Operation Latency}{table.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Stress Test Suite}}{6}{table.4}\protected@file@percent }
+\newlabel{tab:stress}{{IV}{6}{Stress Test Suite}{table.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-C}}Stress Test Results}{6}{subsection.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-D}}Comparison: StreamRAG vs Batch GraphRAG}{6}{subsection.6.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-E}}Practical Coding Session}{6}{subsection.6.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-F}}Cursor IDE Simulation}{6}{subsection.6.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-G}}Test Coverage}{6}{subsection.6.7}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Performance comparison across six test scenarios. StreamRAG achieves consistent speedups, with maximum advantage (27$\times $) in multi-file and realistic session scenarios.}}{6}{figure.7}\protected@file@percent }
+\newlabel{fig:comparison}{{7}{6}{Performance comparison across six test scenarios. StreamRAG achieves consistent speedups, with maximum advantage (27$\times $) in multi-file and realistic session scenarios}{figure.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {V}{\ignorespaces Speedup Analysis: StreamRAG vs Batch GraphRAG}}{6}{table.5}\protected@file@percent }
+\newlabel{tab:speedup}{{V}{6}{Speedup Analysis: StreamRAG vs Batch GraphRAG}{table.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Case Study: Impact Analysis}{6}{section.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VIII}Data Structure Summary}{6}{section.8}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {VI}{\ignorespaces Practical Session: Speed Comparison}}{7}{table.6}\protected@file@percent }
+\newlabel{tab:practical}{{VI}{7}{Practical Session: Speed Comparison}{table.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {VII}{\ignorespaces Cursor IDE Simulation}}{7}{table.7}\protected@file@percent }
+\newlabel{tab:cursor}{{VII}{7}{Cursor IDE Simulation}{table.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {IX}Discussion}{7}{section.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IX-A}}Design Decisions}{7}{subsection.9.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IX-B}}Limitations}{7}{subsection.9.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IX-C}}Filtering False Edges}{7}{subsection.9.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Test distribution across 10 functional areas. Language extractors account for the largest share (127 tests across 7 languages).}}{7}{figure.8}\protected@file@percent }
+\newlabel{fig:test_dist}{{8}{7}{Test distribution across 10 functional areas. Language extractors account for the largest share (127 tests across 7 languages)}{figure.8}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {VIII}{\ignorespaces Core Data Structures}}{7}{table.8}\protected@file@percent }
+\newlabel{tab:datastructures}{{VIII}{7}{Core Data Structures}{table.8}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {X}Conclusion}{7}{section.10}\protected@file@percent }
+\bibcite{lewis2020retrieval}{1}
+\bibcite{treesitter}{2}
+\bibcite{codegraph2023}{3}
+\bibcite{grace2024}{4}
+\bibcite{repomap2024}{5}
+\bibcite{cursor2024}{6}
+\bibcite{copilot2023}{7}
+\bibcite{graphrag2024}{8}
+\bibcite{lsp2016}{9}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {X-A}}Future Work}{8}{subsection.10.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{References}{8}{subsection.10.1}\protected@file@percent }
+\gdef \@abspage@last{8}
