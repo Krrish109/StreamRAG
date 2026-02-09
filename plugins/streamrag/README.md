@@ -16,6 +16,17 @@
 
 <br/>
 
+## Quick Install
+
+```bash
+claude plugin marketplace add Krrish109/StreamRAG
+claude plugin install streamrag@streamrag
+```
+
+Restart Claude Code — StreamRAG activates automatically on every session.
+
+<br/>
+
 ## The Problem
 
 Claude Code is powerful but **flies blind on code structure**. It greps for callers, guesses at dependencies, and can't reliably answer "what breaks if I change this?" For large codebases, this means wasted context window on exploration and missed dependencies on refactors.
