@@ -81,6 +81,11 @@ class StreamRAGDaemon:
         self._save_task: Optional[asyncio.Task] = None
         self._server: Optional[asyncio.AbstractServer] = None
         self._cleanup_counter = 0
+        # V2 integration
+        self._debounce_buffers: Dict[str, dict] = {}  # file -> {content, timestamp}
+        self._context_stabilizer = None  # Set in _load_or_create_bridge
+        self._session_manager = None  # Set in _load_or_create_bridge
+        self._propagation_task: Optional[asyncio.Task] = None
 
     # ---- lifecycle --------------------------------------------------------
 
@@ -110,6 +115,21 @@ class StreamRAGDaemon:
                 bridge._propagator = BoundedPropagator(graph=bridge.graph)
         except ImportError:
             pass
+
+        # Enable context stabilizer
+        try:
+            from streamrag.v2.context_stabilizer import AdaptiveContextStabilizer
+            self._context_stabilizer = AdaptiveContextStabilizer()
+        except ImportError:
+            pass
+
+        # Enable session manager (requires versioned graph)
+        if bridge._versioned:
+            try:
+                from streamrag.v2.versioned_graph import AISessionManager
+                self._session_manager = AISessionManager(bridge._versioned)
+            except ImportError:
+                pass
 
         return bridge
 
@@ -186,6 +206,52 @@ class StreamRAGDaemon:
             if not os.path.exists(check_path):
                 bridge.remove_file(file_path)
                 self._dirty = True
+
+    def _classify_change_tier(self, old_content: str, new_content: str) -> int:
+        """Classify a file change into a debounce tier based on diff size.
+
+        Returns a DebounceTier-compatible int:
+          SEMANTIC (3): multi-line diff or large change
+          STATEMENT (2): single-line multi-char change
+          TOKEN (1): single-char change
+          BUFFER_ONLY (-1): identical content
+        """
+        try:
+            from streamrag.v2.debouncer import DebounceTier
+        except ImportError:
+            return 3  # SEMANTIC fallback — always process
+
+        if old_content == new_content:
+            return DebounceTier.BUFFER_ONLY
+
+        old_lines = old_content.splitlines(keepends=True)
+        new_lines = new_content.splitlines(keepends=True)
+
+        # Count changed lines
+        changed_lines = 0
+        total_char_diff = abs(len(new_content) - len(old_content))
+
+        max_lines = max(len(old_lines), len(new_lines))
+        min_lines = min(len(old_lines), len(new_lines))
+
+        # Different line counts = multi-line change
+        if abs(len(old_lines) - len(new_lines)) > 1:
+            return DebounceTier.SEMANTIC
+
+        for i in range(min_lines):
+            if old_lines[i] != new_lines[i]:
+                changed_lines += 1
+
+        changed_lines += max_lines - min_lines
+
+        if changed_lines > 1:
+            return DebounceTier.SEMANTIC
+        elif changed_lines == 1 and total_char_diff > 1:
+            return DebounceTier.STATEMENT
+        elif total_char_diff <= 1:
+            return DebounceTier.TOKEN
+        else:
+            return DebounceTier.STATEMENT
 
     def _save_if_dirty(self) -> None:
         """Save project state if dirty."""
@@ -265,6 +331,27 @@ class StreamRAGDaemon:
         except (IOError, OSError):
             return {}
 
+        # Debounce: classify change tier
+        try:
+            from streamrag.v2.debouncer import DebounceTier
+            tier = self._classify_change_tier(old_content, new_content)
+            now = time.time()
+            if tier < DebounceTier.STATEMENT:
+                # Buffer this change
+                self._debounce_buffers[file_path] = {
+                    "new_content": new_content,
+                    "old_content": old_content,
+                    "timestamp": now,
+                    "abs_file_path": abs_file_path,
+                    "project_path": project_path,
+                }
+                return {}
+            else:
+                # Clear buffer for this file if any
+                self._debounce_buffers.pop(file_path, None)
+        except ImportError:
+            pass  # Debouncer not available, process immediately
+
         change = CodeChange(
             file_path=file_path,
             old_content=old_content,
@@ -310,6 +397,10 @@ class StreamRAGDaemon:
             if warnings:
                 msg += " | WARNINGS: " + "; ".join(warnings)
 
+        # Invalidate context stabilizer cache
+        if self._context_stabilizer:
+            self._context_stabilizer.invalidate()
+
         return {"systemMessage": msg}
 
     def handle_get_read_context(self, req: dict) -> dict:
@@ -345,6 +436,27 @@ class StreamRAGDaemon:
         if bridge._hierarchical:
             bridge._hierarchical.access_file(file_path)
 
+        # Use context stabilizer if available
+        if self._context_stabilizer:
+            def _build_stable_context(fp):
+                from streamrag.v2.context_stabilizer import StableContext
+                file_nodes = bridge.graph.get_nodes_by_file(fp)
+                entities = [n.name for n in file_nodes if n.type in ("function", "class")]
+                imports = [n.name for n in file_nodes if n.type == "import"]
+                return StableContext(
+                    file_path=fp,
+                    imports=imports,
+                    available_symbols=entities,
+                )
+            ctx = self._context_stabilizer.get_context(
+                file_path, line=0, column=0, current_token="",
+                stable_builder=_build_stable_context,
+            )
+            if ctx.is_within_stability_window:
+                # Return cached result — skip expensive context rebuild
+                if hasattr(self, '_last_read_context') and self._last_read_context.get("file") == file_path:
+                    return self._last_read_context.get("result", {})
+
         budget = int(os.environ.get("STREAMRAG_CONTEXT_BUDGET", "1000"))
         try:
             from streamrag.agent.context_builder import get_context_for_file, format_rich_context
@@ -355,7 +467,10 @@ class StreamRAGDaemon:
             entity_count = len([n for n in nodes if n.type in ("function", "class")])
             msg = f"[StreamRAG] {basename}: {entity_count} entities"
 
-        return {"systemMessage": msg}
+        result = {"systemMessage": msg}
+        if self._context_stabilizer:
+            self._last_read_context = {"file": file_path, "result": result}
+        return result
 
     def handle_classify_query(self, req: dict) -> dict:
         """Classify and optionally execute a relationship query (Explore/Grep redirect)."""
@@ -575,6 +690,77 @@ class StreamRAGDaemon:
         except Exception:
             return None
 
+    def handle_start_session(self, _req: dict) -> dict:
+        """Start an AI session for conflict detection."""
+        if not self._session_manager:
+            return {"error": "Session manager not available"}
+        session = self._session_manager.start_session()
+        return {
+            "session_id": session.session_id,
+            "base_version": session.base_version,
+        }
+
+    def handle_complete_session(self, req: dict) -> dict:
+        """Complete an AI session and check for conflicts."""
+        if not self._session_manager:
+            return {"error": "Session manager not available"}
+        session_id = req.get("session_id", "")
+        if not session_id:
+            return {"error": "session_id required"}
+        result = self._session_manager.complete_session(session_id)
+        return {
+            "status": result.status,
+            "drift": result.drift,
+            "can_apply": result.can_apply,
+            "conflicts": [
+                {
+                    "type": c.conflict_type.value,
+                    "severity": c.severity.value,
+                    "node_id": c.node_id,
+                    "description": c.description,
+                }
+                for c in result.conflicts
+            ],
+        }
+
+    async def _periodic_propagation_loop(self) -> None:
+        """Drain async propagation queue every 200ms."""
+        while True:
+            await asyncio.sleep(0.2)
+            try:
+                if self.bridge and self.bridge._propagator:
+                    if self.bridge._propagator.async_queue_size > 0:
+                        self.bridge._propagator.process_async_queue(
+                            max_items=5, update_fn=self.bridge._re_parse_file
+                        )
+                        self._dirty = True
+            except Exception as e:
+                logger.debug("Propagation queue error: %s", e)
+
+    async def _debounce_flush_loop(self) -> None:
+        """Flush stale debounce buffers after 500ms of inactivity."""
+        while True:
+            await asyncio.sleep(0.5)
+            now = time.time()
+            stale = [
+                fp for fp, buf in self._debounce_buffers.items()
+                if now - buf["timestamp"] > 0.5
+            ]
+            for fp in stale:
+                buf = self._debounce_buffers.pop(fp, None)
+                if buf:
+                    try:
+                        change = CodeChange(
+                            file_path=fp,
+                            old_content=buf["old_content"],
+                            new_content=buf["new_content"],
+                        )
+                        bridge = self._ensure_bridge()
+                        bridge.process_change(change)
+                        self._dirty = True
+                    except Exception as e:
+                        logger.debug("Debounce flush error: %s", e)
+
     # ---- dispatch ---------------------------------------------------------
 
     HANDLERS = {
@@ -585,6 +771,8 @@ class StreamRAGDaemon:
         "classify_query": "handle_classify_query",
         "classify_user_prompt": "handle_classify_user_prompt",
         "get_compact_summary": "handle_get_compact_summary",
+        "start_session": "handle_start_session",
+        "complete_session": "handle_complete_session",
     }
 
     def dispatch(self, request: dict) -> dict:
@@ -648,6 +836,8 @@ class StreamRAGDaemon:
 
         self._server = await asyncio.start_unix_server(self._handle_client, path=sock_path)
         self._save_task = asyncio.create_task(self._periodic_save_loop())
+        self._propagation_task = asyncio.create_task(self._periodic_propagation_loop())
+        self._debounce_task = asyncio.create_task(self._debounce_flush_loop())
 
         logger.info("Daemon started: pid=%d socket=%s nodes=%d edges=%d",
                      os.getpid(), sock_path,
@@ -680,6 +870,15 @@ class StreamRAGDaemon:
                 await self._save_task
             except asyncio.CancelledError:
                 pass
+
+        for task_attr in ('_propagation_task', '_debounce_task'):
+            task = getattr(self, task_attr, None)
+            if task:
+                task.cancel()
+                try:
+                    await task
+                except asyncio.CancelledError:
+                    pass
 
         self._save_if_dirty()
 

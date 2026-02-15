@@ -64,6 +64,7 @@ class DeltaGraphBridge:
         # V2 components (opt-in)
         self._op_log: List = []  # List of V2 GraphOp objects
         self._last_batch = None  # Optional OperationBatch from last process_change
+        self._op_log_mark: int = 0  # Track batch boundaries in _op_log
 
         # VersionedGraph: tracks per-file versions and operation history
         self._versioned = None
@@ -75,6 +76,8 @@ class DeltaGraphBridge:
         self._hierarchical = None
         self._propagator = None
         self._propagating: bool = False  # recursion guard for propagation
+        # SemanticPath cache: file_path -> List[SemanticPath]
+        self._semantic_paths: Dict[str, list] = {}
 
     @property
     def version(self) -> int:
@@ -102,6 +105,14 @@ class DeltaGraphBridge:
                 result = ext.extract(source, file_path)
                 if not result and shadow_fallback and source.strip() and file_path.endswith((".py", ".pyi")):
                     return self._shadow_extract(source)
+                # Dual extraction: SemanticPaths for Python files
+                if file_path.endswith((".py", ".pyi")) and result:
+                    try:
+                        from streamrag.v2.semantic_path import ScopeAwareExtractor
+                        sem_ext = ScopeAwareExtractor(file_path)
+                        self._semantic_paths[file_path] = sem_ext.extract(source, file_path)
+                    except (ImportError, Exception):
+                        pass
                 return result
         # Fallback to original Python extractor
         result = extract(source)
@@ -242,6 +253,12 @@ class DeltaGraphBridge:
                 if src and src.file_path != file_path:
                     had_callers.append(src.name)
             self.graph.remove_node(node_id)
+            # V2: Record RemoveNode op
+            try:
+                from streamrag.v2.operations import RemoveNode as RemoveNodeOp
+                self._op_log.append(RemoveNodeOp(node_id=node_id))
+            except ImportError:
+                pass
             props = {"name": entity.name}
             if had_callers:
                 props["had_callers"] = had_callers
@@ -275,6 +292,12 @@ class DeltaGraphBridge:
                 },
             )
             self.graph.add_node(node)
+            # V2: Record AddNode op
+            try:
+                from streamrag.v2.operations import AddNode as AddNodeOp
+                self._op_log.append(AddNodeOp(node=node))
+            except ImportError:
+                pass
 
             # First-pass edge creation
             edges = self._create_first_pass_edges(entity, node_id, file_path)
@@ -327,6 +350,13 @@ class DeltaGraphBridge:
                     },
                 )
                 self.graph.add_node(new_node)
+                # V2: Record rename as RemoveNode + AddNode
+                try:
+                    from streamrag.v2.operations import RemoveNode as RemoveNodeOp, AddNode as AddNodeOp
+                    self._op_log.append(RemoveNodeOp(node_id=old_node_id))
+                    self._op_log.append(AddNodeOp(node=new_node))
+                except ImportError:
+                    pass
             else:
                 # Body change: update existing node
                 node_id = _generate_node_id(file_path, entity.entity_type, entity.name)
@@ -342,6 +372,15 @@ class DeltaGraphBridge:
                     existing.properties["type_refs"] = entity.type_refs
                     existing.properties["params"] = entity.params
                     existing.properties["decorators"] = entity.decorators
+                    # V2: Record UpdateNode op
+                    try:
+                        from streamrag.v2.operations import UpdateNode as UpdateNodeOp
+                        self._op_log.append(UpdateNodeOp(
+                            node_id=node_id,
+                            updates={"signature_hash": entity.signature_hash},
+                        ))
+                    except ImportError:
+                        pass
                     # Clear stale outgoing edges so re-resolution picks up changes
                     for edge in self.graph.get_outgoing_edges(node_id):
                         if edge.edge_type in ("calls", "inherits", "uses_type", "decorated_by"):
@@ -397,6 +436,19 @@ class DeltaGraphBridge:
                 del self._file_contents[k]
         self._update_dependency_index(file_path)
         self._update_module_file_index(file_path)
+
+        # Wrap V2 ops in OperationBatch for atomic record
+        try:
+            from streamrag.v2.operations import OperationBatch
+            if self._op_log:
+                # Create batch from ops accumulated this call
+                batch_start = getattr(self, '_op_log_mark', 0)
+                new_ops = self._op_log[batch_start:]
+                if new_ops:
+                    self._last_batch = OperationBatch(list(new_ops))
+                self._op_log_mark = len(self._op_log)
+        except ImportError:
+            pass
 
         # 8. RECORD IN VERSIONED GRAPH (if enabled)
         if self._versioned:
@@ -846,6 +898,26 @@ class DeltaGraphBridge:
                             if _is_test_file(node.file_path):
                                 self._resolution_stats["to_test_file"] += 1
                             return node
+
+        # Enhanced resolution via SemanticPath (if available)
+        if self._semantic_paths:
+            try:
+                from streamrag.v2.semantic_path import resolve_name as sp_resolve
+                # Get scope chain for current file
+                current_paths = self._semantic_paths.get(current_file, [])
+                if current_paths:
+                    resolved = sp_resolve(name, (), current_paths)
+                    if resolved:
+                        # Find the graph node matching the resolved SemanticPath
+                        for node in self.graph._nodes.values():
+                            if (node.type == expected_type
+                                    and node.name == resolved.name
+                                    and node.file_path == resolved.file_path):
+                                self._last_confidence = "high"
+                                self._resolution_stats["resolved"] += 1
+                                return node
+            except (ImportError, Exception):
+                pass
 
         imported_files = self._get_imported_file_paths(current_file)
 

@@ -142,3 +142,21 @@ def send_request(
         return None
     finally:
         sock.close()
+
+
+def start_session(project_path: str, timeout: float = 2.0) -> Optional[dict]:
+    """Start an AI session via the daemon. Returns {session_id, base_version} or None."""
+    return send_request(project_path, {"cmd": "start_session"}, timeout=timeout)
+
+
+def complete_session(
+    project_path: str,
+    session_id: str,
+    proposed_changes: Optional[list] = None,
+    timeout: float = 2.0,
+) -> Optional[dict]:
+    """Complete an AI session. Returns {status, drift, can_apply, conflicts} or None."""
+    req = {"cmd": "complete_session", "session_id": session_id}
+    if proposed_changes:
+        req["proposed_changes"] = proposed_changes
+    return send_request(project_path, req, timeout=timeout)
