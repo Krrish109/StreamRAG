@@ -174,7 +174,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"
 tokio = { version = "1", features = ["full"] }
-clang-sys = { version = "1", features = ["clang_16_0"] }
+clang-sys = { version = "1", features = ["clang_16_0", "static"] }
 ```
 
 **`parsers/rust/src/rust_parser.rs`:**
@@ -230,7 +230,7 @@ Add to same Rust binary:
 
 **Build:** Same `cargo build --release` (single binary handles all 3 languages)
 
-**Requires on user machine:** `libclang` (macOS: comes with Xcode CLI tools, Linux: `apt install libclang-dev`)
+**No runtime deps:** libclang is statically linked into the binary (~50MB). Users don't need Xcode, LLVM, or libclang-dev installed.
 
 **Commit after this task.**
 

@@ -56,8 +56,9 @@ The TypeScript compiler API (`ts.createSourceFile`) gives us:
 - The actual Clang compiler frontend — 100% accurate AST
 - Handles every C/C++ construct (templates, macros, preprocessor, namespaces)
 - Accessed from Rust via `clang-sys` crate (FFI bindings to libclang)
-- Available on macOS (Xcode), Linux (`libclang-dev`), Windows (LLVM installer)
+- **Statically linked** into the Rust binary — zero runtime deps, no Xcode/LLVM required
 - Same parser used by clangd, clang-tidy, clang-format
+- Binary size ~50MB (includes LLVM frontend)
 
 ### Why JavaParser for Java?
 
@@ -203,7 +204,7 @@ StreamRAG/
 - **Entry**: `parsers/rust/target/release/streamrag-parser --socket ~/.claude/streamrag/parsers/rust.sock`
 - Handles `.rs`, `.c`, `.cpp`, `.cc`, `.cxx`, `.hpp`, `.h`
 - Single binary, three languages
-- Requires `libclang` installed on system (Xcode on macOS, `libclang-dev` on Linux)
+- libclang statically linked — zero runtime deps, ~50MB binary
 
 ### Java Parser
 
@@ -240,8 +241,7 @@ Each native parser applies the same builtin/common-method filters as the current
 | Language | Requires |
 |----------|----------|
 | TypeScript/JavaScript | Node.js ≥ 18 |
-| Rust | None (pre-compiled binary) |
-| C/C++ | `libclang` (Xcode on macOS, `libclang-dev` on Linux) |
+| Rust/C/C++ | None (pre-compiled binary with libclang statically linked) |
 | Java | JRE ≥ 17 |
 
 ## Testing
